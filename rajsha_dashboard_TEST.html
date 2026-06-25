@@ -1142,7 +1142,7 @@ var FG_PLANTS = [
 function fgProdKey(plantKey, idx){return plantKey+'_'+idx;}
 
 // ── MANPOWER REQUIREMENTS (from Excel — Yogi sheet + Para sheet) ──
-var MPD=['Plant 1','Plant 2','Plant 3','Plant 4','Plant 5 HM 100','Plant 5 Wax','Plant 5 Boiler','Blender','ETP','Store','Maintenance','TFH','Lab','Office Boy','Cleaning','RSA','General','Formaldehyde','Security','Housekeeping','EHS','Electrical','Packing','Extra'];
+var MPD=['Plant 1','Plant 2','Plant 3','Plant 4','Plant 5 HM 100','Plant 5 Wax','Plant 5 Boiler','Blender','ETP','Store','Maintenance','TFH','Lab','Office Boy','Cleaning','RSA','General','Formaldehyde','Security','Housekeeping','EHS','Electrical','Extra'];
 
 var MPR0={
   'Plant 1':       {yogi:{day:0, night:0}, paramount:{day:0, night:0}, gujarat:{day:0,night:0},yash:{day:0,night:0}},
@@ -1167,7 +1167,6 @@ var MPR0={
   'Housekeeping':  {yogi:{day:0, night:0}, paramount:{day:0, night:0}, gujarat:{day:0,night:0},yash:{day:4,night:0}},
   'EHS':           {yogi:{day:0, night:0}, paramount:{day:1, night:0}, gujarat:{day:0,night:0},yash:{day:0,night:0}},
   'Electrical':    {yogi:{day:0, night:0}, paramount:{day:1, night:0}, gujarat:{day:0,night:0},yash:{day:0,night:0}},
-  'Packing':       {yogi:{day:0, night:0}, paramount:{day:0, night:0}, gujarat:{day:0,night:0},yash:{day:0,night:0}},
   'Extra':         {yogi:{day:0, night:0}, paramount:{day:0, night:0}, gujarat:{day:0,night:0},yash:{day:0,night:0}}
 };
 function getMR(){return SD['mp_reqs']||JSON.parse(JSON.stringify(MPR0));}
@@ -2235,7 +2234,7 @@ var SP_LIST='RajshaProduction';
 // ═══════════════════════════════════════════════════
 // GOOGLE SHEETS SYNC - paste your Apps Script URL below
 // ═══════════════════════════════════════════════════
-var GSCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw7nlmC6_rxxrMODKyQqU8k-Bn_MUTCJAy-C8pp0APm9hEOzd-5AxNImf-ZGESSM5-w/exec';
+var GSCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzHBADeonqHDUiBH3oWrXHGOyQ51jry5pf76qMv0y_rBzKNmG3UhnfnRCiTl4OextMTnQ/exec';
 
 function syncToSheets(dept, data, onDone){
   if(!GSCRIPT_URL || GSCRIPT_URL === 'PASTE_YOUR_APPS_SCRIPT_URL_HERE'){
@@ -2666,7 +2665,7 @@ var SP_LIST='RajshaProduction';
 // ═══════════════════════════════════════════════════
 // GOOGLE SHEETS SYNC - paste your Apps Script URL below
 // ═══════════════════════════════════════════════════
-var GSCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw7nlmC6_rxxrMODKyQqU8k-Bn_MUTCJAy-C8pp0APm9hEOzd-5AxNImf-ZGESSM5-w/exec';
+var GSCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzHBADeonqHDUiBH3oWrXHGOyQ51jry5pf76qMv0y_rBzKNmG3UhnfnRCiTl4OextMTnQ/exec';
 
 function syncToSheets(dept, data, onDone){
   if(!GSCRIPT_URL || GSCRIPT_URL === 'PASTE_YOUR_APPS_SCRIPT_URL_HERE'){
@@ -12996,7 +12995,7 @@ h+='<button onclick="showProjections()" style="background:rgba(78,158,255,0.15);
     h+='<div class="senior-card"><div class="senior-dept-hdr"><div class="senior-dept-name" style="color:'+d.acc+'">'+d.name+'</div>';
     // Build Google Sheet URL for this department
     var deptTabMap={production:'PRODUCTION',electricity:'ELECTRICITY',dispatch:'DISPATCH',formaldehyde:'FORMALDEHYDE',firepump:'SAFETY',water:'WATER+CONSUMPTION',manpower:'HR+MANPOWER'};
-    var sheetBase='https://docs.google.com/spreadsheets/d/1njxI3DYGTSGU2jl9Vpi8seDx05PRCxACrcQ7FcMrOtk/edit';
+    var sheetBase='https://docs.google.com/spreadsheets/d/1gjUadt_gdltdxwkkj3EIx3GAa5H6sBfEMbHOd8prYZA/edit';
     var sheetPill='<a href="'+sheetBase+'" target="_blank" title="Open '+( deptTabMap[d.id]||d.name)+' sheet in Google Sheets" style="text-decoration:none;">'
       +'<span class="status-pill '+d.ss+'" style="cursor:pointer;display:inline-flex;align-items:center;gap:3px;">'+ptxt
       +'<svg width="9" height="9" viewBox="0 0 10 10" fill="none" style="opacity:0.7;flex-shrink:0;"><path d="M1 9L9 1M9 1H4M9 1V6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>'
