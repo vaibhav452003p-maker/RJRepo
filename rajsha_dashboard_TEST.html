@@ -13069,8 +13069,10 @@ h+='<button onclick="showProjections()" style="background:rgba(78,158,255,0.15);
     });
 
     // (Removed) Live submitted timestamp badge — cleaner card look per user request
+    h+='</div></div>';
 
-    // v5.18: Certificates & Licenses block — appended only to the HR/Manpower card
+    // v5.19: Certificates & Licenses — its own standalone card, placed
+    // immediately after the HR/Manpower card (not stacked inside it).
     if(d.isMP && CERT_DATA && CERT_DATA.length>0){
       var _certToday=new Date(); _certToday.setHours(0,0,0,0);
       var _certRows=CERT_DATA.map(function(c){
@@ -13097,14 +13099,13 @@ h+='<button onclick="showProjections()" style="background:rgba(78,158,255,0.15);
         if(c.days===null) return;
         if(c.days<0) _overdueCt++; else if(c.days<=30) _soonCt++; else _safeCt++;
       });
-      h+='<div style="margin-top:14px;padding-top:12px;border-top:1px dashed var(--border);">';
-      h+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">';
-      h+='<div style="font-size:11px;font-weight:600;color:'+d.acc+';text-transform:uppercase;letter-spacing:0.05em;">Certificates &amp; Licenses</div>';
+      var _certAcc='#f59e0b';
+      h+='<div class="senior-card"><div class="senior-dept-hdr"><div class="senior-dept-name" style="color:'+_certAcc+'">Certificates &amp; Licenses</div>';
       h+='<div style="display:flex;gap:4px;">';
       if(_overdueCt>0) h+='<span style="font-size:9px;font-weight:700;background:rgba(240,79,79,0.15);color:#ff6b6b;padding:2px 7px;border-radius:8px;">'+_overdueCt+' overdue</span>';
       if(_soonCt>0) h+='<span style="font-size:9px;font-weight:700;background:rgba(245,158,11,0.15);color:#f59e0b;padding:2px 7px;border-radius:8px;">'+_soonCt+' due soon</span>';
       h+='<span style="font-size:9px;font-weight:700;background:rgba(34,197,94,0.12);color:#22c55e;padding:2px 7px;border-radius:8px;">'+_safeCt+' safe</span>';
-      h+='</div></div>';
+      h+='</div></div><div>';
       _certRows.forEach(function(c){
         var _dotColor='#22c55e',_badgeBg='rgba(34,197,94,0.12)',_badgeColor='#22c55e',_lbl='—';
         if(c.status.toLowerCase()==='renewed'){
@@ -13120,16 +13121,14 @@ h+='<button onclick="showProjections()" style="background:rgba(78,158,255,0.15);
         } else {
           _dotColor='#22c55e';_badgeBg='rgba(34,197,94,0.12)';_badgeColor='#22c55e';_lbl=c.days+'d left';
         }
-        h+='<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--border);">';
-        h+='<span style="width:6px;height:6px;border-radius:50%;background:'+_dotColor+';flex-shrink:0;"></span>';
-        h+='<span style="flex:1;font-size:12px;color:var(--text);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+c.name+'</span>';
-        h+='<span style="font-size:9px;font-weight:700;background:'+_badgeBg+';color:'+_badgeColor+';padding:2px 8px;border-radius:8px;white-space:nowrap;">'+_lbl+'</span>';
+        h+='<div class="senior-row" style="align-items:center;">';
+        h+='<div class="senior-name" style="display:flex;align-items:center;gap:8px;">';
+        h+='<span style="width:6px;height:6px;border-radius:50%;background:'+_dotColor+';flex-shrink:0;"></span>'+c.name+'</div>';
+        h+='<div class="senior-val"><span style="font-size:9px;font-weight:700;background:'+_badgeBg+';color:'+_badgeColor+';padding:2px 8px;border-radius:8px;white-space:nowrap;">'+_lbl+'</span></div>';
         h+='</div>';
       });
-      h+='</div>';
+      h+='</div></div>';
     }
-
-    h+='</div></div>';
   });
   h+='</div>';
 
