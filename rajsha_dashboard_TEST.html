@@ -13071,8 +13071,8 @@ h+='<button onclick="showProjections()" style="background:rgba(78,158,255,0.15);
     // (Removed) Live submitted timestamp badge — cleaner card look per user request
     h+='</div></div>';
 
-    // v5.19: Certificates & Licenses — its own standalone card, placed
-    // immediately after the HR/Manpower card (not stacked inside it).
+    // v5.20: Certificates & Licenses — standalone full-width card with icon
+    // header, status pills, and a full table (matches approved mockup).
     if(d.isMP && CERT_DATA && CERT_DATA.length>0){
       var _certToday=new Date(); _certToday.setHours(0,0,0,0);
       var _certRows=CERT_DATA.map(function(c){
@@ -13085,7 +13085,10 @@ h+='<button onclick="showProjections()" style="background:rgba(78,158,255,0.15);
         if(_validDate&&!isNaN(_validDate.getTime())){
           _days=Math.round((_validDate.getTime()-_certToday.getTime())/86400000);
         }
-        return {name:_name,no:_no,valid:_validRaw,status:_status,days:_days};
+        var _validFmt=_validDate&&!isNaN(_validDate.getTime())
+          ? _validDate.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}).replace(/ /g,'-')
+          : '—';
+        return {name:_name,no:_no||'—',validFmt:_validFmt,status:_status,days:_days};
       }).filter(function(c){
         return c.status.toLowerCase()!=='inactive' && c.status.toLowerCase()!=='closed';
       });
@@ -13099,13 +13102,30 @@ h+='<button onclick="showProjections()" style="background:rgba(78,158,255,0.15);
         if(c.days===null) return;
         if(c.days<0) _overdueCt++; else if(c.days<=30) _soonCt++; else _safeCt++;
       });
-      var _certAcc='#f59e0b';
-      h+='<div class="senior-card"><div class="senior-dept-hdr"><div class="senior-dept-name" style="color:'+_certAcc+'">Certificates &amp; Licenses</div>';
-      h+='<div style="display:flex;gap:4px;">';
-      if(_overdueCt>0) h+='<span style="font-size:9px;font-weight:700;background:rgba(240,79,79,0.15);color:#ff6b6b;padding:2px 7px;border-radius:8px;">'+_overdueCt+' overdue</span>';
-      if(_soonCt>0) h+='<span style="font-size:9px;font-weight:700;background:rgba(245,158,11,0.15);color:#f59e0b;padding:2px 7px;border-radius:8px;">'+_soonCt+' due soon</span>';
-      h+='<span style="font-size:9px;font-weight:700;background:rgba(34,197,94,0.12);color:#22c55e;padding:2px 7px;border-radius:8px;">'+_safeCt+' safe</span>';
-      h+='</div></div><div>';
+
+      h+='<div class="senior-card" style="grid-column:1 / -1;">';
+      // Header: icon + title/subtitle on left, pills on right
+      h+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px;">';
+      h+='<div style="display:flex;align-items:center;gap:10px;">';
+      h+='<div style="width:30px;height:30px;background:rgba(78,158,255,0.12);border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">';
+      h+='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4e9eff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>';
+      h+='</div><div>';
+      h+='<div style="font-size:13px;font-weight:600;color:var(--text);">Certificates &amp; Licenses</div>';
+      h+='<div style="font-size:11px;color:var(--text3);margin-top:1px;">Live from CERTIFICATES sheet &middot; alerts at 30 / 15 / 7 / 1 days</div>';
+      h+='</div></div>';
+      h+='<div style="display:flex;gap:6px;flex-wrap:wrap;">';
+      if(_overdueCt>0) h+='<span style="font-size:10px;font-weight:700;background:rgba(240,79,79,0.15);color:#ff6b6b;padding:3px 8px;border-radius:10px;">'+_overdueCt+' overdue</span>';
+      if(_soonCt>0) h+='<span style="font-size:10px;font-weight:700;background:rgba(245,158,11,0.15);color:#f59e0b;padding:3px 8px;border-radius:10px;">'+_soonCt+' due soon</span>';
+      h+='<span style="font-size:10px;font-weight:700;background:rgba(34,197,94,0.12);color:#22c55e;padding:3px 8px;border-radius:10px;">'+_safeCt+' safe</span>';
+      h+='</div></div>';
+
+      // Table
+      h+='<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:12px;">';
+      h+='<thead><tr>';
+      ['Certificate','Certificate no.','Valid upto','Days left','Status'].forEach(function(th){
+        h+='<th style="background:var(--bg3);color:var(--text2);font-weight:600;padding:7px 10px;text-align:left;border:1px solid var(--border);white-space:nowrap;">'+th+'</th>';
+      });
+      h+='</tr></thead><tbody>';
       _certRows.forEach(function(c){
         var _dotColor='#22c55e',_badgeBg='rgba(34,197,94,0.12)',_badgeColor='#22c55e',_lbl='—';
         if(c.status.toLowerCase()==='renewed'){
@@ -13113,21 +13133,24 @@ h+='<button onclick="showProjections()" style="background:rgba(78,158,255,0.15);
         } else if(c.days===null){
           _dotColor='var(--text3)';_badgeBg='rgba(255,255,255,0.05)';_badgeColor='var(--text3)';_lbl='No date';
         } else if(c.days<0){
-          _dotColor='#ff4444';_badgeBg='rgba(240,79,79,0.15)';_badgeColor='#ff6b6b';_lbl=Math.abs(c.days)+'d overdue';
+          _dotColor='#ff4444';_badgeBg='rgba(240,79,79,0.15)';_badgeColor='#ff6b6b';_lbl=Math.abs(c.days)+' days overdue';
         } else if(c.days<=7){
-          _dotColor='#f59e0b';_badgeBg='rgba(245,158,11,0.15)';_badgeColor='#f59e0b';_lbl=c.days+'d left';
+          _dotColor='#f59e0b';_badgeBg='rgba(245,158,11,0.15)';_badgeColor='#f59e0b';_lbl=c.days+' day'+(c.days===1?'':'s')+' left';
         } else if(c.days<=30){
-          _dotColor='#4e9eff';_badgeBg='rgba(78,158,255,0.15)';_badgeColor='#4e9eff';_lbl=c.days+'d left';
+          _dotColor='#4e9eff';_badgeBg='rgba(78,158,255,0.15)';_badgeColor='#4e9eff';_lbl=c.days+' days left';
         } else {
-          _dotColor='#22c55e';_badgeBg='rgba(34,197,94,0.12)';_badgeColor='#22c55e';_lbl=c.days+'d left';
+          _dotColor='#22c55e';_badgeBg='rgba(34,197,94,0.12)';_badgeColor='#22c55e';_lbl=c.days+' days left';
         }
-        h+='<div class="senior-row" style="align-items:center;">';
-        h+='<div class="senior-name" style="display:flex;align-items:center;gap:8px;">';
-        h+='<span style="width:6px;height:6px;border-radius:50%;background:'+_dotColor+';flex-shrink:0;"></span>'+c.name+'</div>';
-        h+='<div class="senior-val"><span style="font-size:9px;font-weight:700;background:'+_badgeBg+';color:'+_badgeColor+';padding:2px 8px;border-radius:8px;white-space:nowrap;">'+_lbl+'</span></div>';
-        h+='</div>';
+        h+='<tr>';
+        h+='<td style="padding:7px 10px;border:1px solid var(--border);color:var(--text);"><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:'+_dotColor+';margin-right:6px;vertical-align:middle;"></span>'+c.name+'</td>';
+        h+='<td style="padding:7px 10px;border:1px solid var(--border);color:var(--text3);">'+c.no+'</td>';
+        h+='<td style="padding:7px 10px;border:1px solid var(--border);color:var(--text2);white-space:nowrap;">'+c.validFmt+'</td>';
+        h+='<td style="padding:7px 10px;border:1px solid var(--border);"><span style="font-size:10px;font-weight:700;background:'+_badgeBg+';color:'+_badgeColor+';padding:2px 8px;border-radius:8px;white-space:nowrap;">'+_lbl+'</span></td>';
+        h+='<td style="padding:7px 10px;border:1px solid var(--border);color:var(--text3);">'+c.status+'</td>';
+        h+='</tr>';
       });
-      h+='</div></div>';
+      h+='</tbody></table></div>';
+      h+='</div>';
     }
   });
   h+='</div>';
