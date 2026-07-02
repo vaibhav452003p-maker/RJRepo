@@ -6859,11 +6859,26 @@ function _finFmtK(v){
 }
 
 // ── SENIOR ──
+var CERT_DATA=null; // v5.18: cached CERTIFICATES tab rows for HR/Manpower senior card
+function fetchCertificates(callback){
+  if(!GSCRIPT_URL || GSCRIPT_URL==='PASTE_YOUR_APPS_SCRIPT_URL_HERE'){ callback(null); return; }
+  fetch(GSCRIPT_URL+'?action=getCertificates')
+    .then(function(r){return r.json();})
+    .then(function(d){ callback(d); })
+    .catch(function(){ callback(null); });
+}
 function renderSenior(){
   SD=sdLoad();
   document.getElementById('mc').innerHTML='<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 20px;gap:16px;"><div style="width:40px;height:40px;border:3px solid rgba(78,158,255,0.2);border-top-color:#4e9eff;border-radius:50%;animation:spin 0.8s linear infinite;"></div><div style="font-size:14px;color:var(--text2);">Loading latest data from all departments...</div></div>';
-  fetchSheetData(function(sheetData){
-    buildSeniorView(sheetData);
+  var _srDone=0,_srSheet=null;
+  function _srMaybeBuild(){
+    _srDone++;
+    if(_srDone>=2) buildSeniorView(_srSheet);
+  }
+  fetchSheetData(function(sheetData){ _srSheet=sheetData; _srMaybeBuild(); });
+  fetchCertificates(function(certData){
+    if(certData&&certData.status==='ok') CERT_DATA=certData.certificates||[];
+    _srMaybeBuild();
   });
 }
 
@@ -13054,6 +13069,66 @@ h+='<button onclick="showProjections()" style="background:rgba(78,158,255,0.15);
     });
 
     // (Removed) Live submitted timestamp badge — cleaner card look per user request
+
+    // v5.18: Certificates & Licenses block — appended only to the HR/Manpower card
+    if(d.isMP && CERT_DATA && CERT_DATA.length>0){
+      var _certToday=new Date(); _certToday.setHours(0,0,0,0);
+      var _certRows=CERT_DATA.map(function(c){
+        var _name=c['Certificate Name']||'';
+        var _no=c['Certificate No.']||'';
+        var _validRaw=c['Valid Upto']||'';
+        var _status=(c['Status']||'Active').trim();
+        var _validDate=_validRaw?new Date(_validRaw):null;
+        var _days=null;
+        if(_validDate&&!isNaN(_validDate.getTime())){
+          _days=Math.round((_validDate.getTime()-_certToday.getTime())/86400000);
+        }
+        return {name:_name,no:_no,valid:_validRaw,status:_status,days:_days};
+      }).filter(function(c){
+        return c.status.toLowerCase()!=='inactive' && c.status.toLowerCase()!=='closed';
+      });
+      _certRows.sort(function(a,b){
+        var av=(a.days===null)?999999:a.days, bv=(b.days===null)?999999:b.days;
+        return av-bv;
+      });
+      var _overdueCt=0,_soonCt=0,_safeCt=0;
+      _certRows.forEach(function(c){
+        if(c.status.toLowerCase()==='renewed') return;
+        if(c.days===null) return;
+        if(c.days<0) _overdueCt++; else if(c.days<=30) _soonCt++; else _safeCt++;
+      });
+      h+='<div style="margin-top:14px;padding-top:12px;border-top:1px dashed var(--border);">';
+      h+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">';
+      h+='<div style="font-size:11px;font-weight:600;color:'+d.acc+';text-transform:uppercase;letter-spacing:0.05em;">Certificates &amp; Licenses</div>';
+      h+='<div style="display:flex;gap:4px;">';
+      if(_overdueCt>0) h+='<span style="font-size:9px;font-weight:700;background:rgba(240,79,79,0.15);color:#ff6b6b;padding:2px 7px;border-radius:8px;">'+_overdueCt+' overdue</span>';
+      if(_soonCt>0) h+='<span style="font-size:9px;font-weight:700;background:rgba(245,158,11,0.15);color:#f59e0b;padding:2px 7px;border-radius:8px;">'+_soonCt+' due soon</span>';
+      h+='<span style="font-size:9px;font-weight:700;background:rgba(34,197,94,0.12);color:#22c55e;padding:2px 7px;border-radius:8px;">'+_safeCt+' safe</span>';
+      h+='</div></div>';
+      _certRows.forEach(function(c){
+        var _dotColor='#22c55e',_badgeBg='rgba(34,197,94,0.12)',_badgeColor='#22c55e',_lbl='—';
+        if(c.status.toLowerCase()==='renewed'){
+          _dotColor='#22c55e';_badgeBg='rgba(34,197,94,0.12)';_badgeColor='#22c55e';_lbl='Renewed';
+        } else if(c.days===null){
+          _dotColor='var(--text3)';_badgeBg='rgba(255,255,255,0.05)';_badgeColor='var(--text3)';_lbl='No date';
+        } else if(c.days<0){
+          _dotColor='#ff4444';_badgeBg='rgba(240,79,79,0.15)';_badgeColor='#ff6b6b';_lbl=Math.abs(c.days)+'d overdue';
+        } else if(c.days<=7){
+          _dotColor='#f59e0b';_badgeBg='rgba(245,158,11,0.15)';_badgeColor='#f59e0b';_lbl=c.days+'d left';
+        } else if(c.days<=30){
+          _dotColor='#4e9eff';_badgeBg='rgba(78,158,255,0.15)';_badgeColor='#4e9eff';_lbl=c.days+'d left';
+        } else {
+          _dotColor='#22c55e';_badgeBg='rgba(34,197,94,0.12)';_badgeColor='#22c55e';_lbl=c.days+'d left';
+        }
+        h+='<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--border);">';
+        h+='<span style="width:6px;height:6px;border-radius:50%;background:'+_dotColor+';flex-shrink:0;"></span>';
+        h+='<span style="flex:1;font-size:12px;color:var(--text);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+c.name+'</span>';
+        h+='<span style="font-size:9px;font-weight:700;background:'+_badgeBg+';color:'+_badgeColor+';padding:2px 8px;border-radius:8px;white-space:nowrap;">'+_lbl+'</span>';
+        h+='</div>';
+      });
+      h+='</div>';
+    }
+
     h+='</div></div>';
   });
   h+='</div>';
